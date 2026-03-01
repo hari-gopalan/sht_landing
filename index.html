@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>ShelfLifeTimer — Waitlist</title>
 
   <style>
@@ -69,6 +69,20 @@
     @media (max-width: 640px) {
       .card{
         margin-top: -190px;   /* bring card closer to image */
+        padding: 22px 22px 20px; 
+      }
+    }
+    
+    /* iOS Safari zoom-prevention: input font-size must be >= 16px */
+    @media (max-width: 640px) {
+      .card input,
+      .card button {
+        font-size: 16px;
+      }
+    
+      /* Optional: keep it visually similar even with 16px text */
+      .card input {
+        line-height: 1.2;
       }
     }
     
