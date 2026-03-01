@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ShelfLifeTimer — Waitlist</title>
+
+  <style>
+
+    :root{
+      --blur: 0px;
+      --cardLift: 0px;
+      --cardShadowA: 0.22; /* shadow intensity */
+      --cardShadowB: 0.14;
+    }
+
+    /* Blur only the hero layers, not the modal/card */
+    #heroFrame, #hourglassImg, #sand {
+      filter: blur(var(--blur));
+      transition: filter 120ms ease;
+    }
+    
+    .card h2{
+      max-width: 500px;
+      margin: 0 auto 14px;
+    }
+
+    /* Card shadow scales up */
+    .card{
+      box-shadow:
+        0 25px 55px rgba(0,0,0,var(--cardShadowA)),
+        0 8px 18px rgba(0,0,0,var(--cardShadowB));
+      transform: translateY(calc(-1 * var(--cardLift)));
+      transition: box-shadow 120ms ease, transform 120ms ease;
+      will-change: box-shadow, transform;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      background: linear-gradient(180deg, #52A6A3 0%, #CDEBE8 100%);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      overflow-x:hidden;
+    }
+    .hero{width:100vw;height:62vh;position:relative}
+    #heroFrame{position:relative;width:100%;height:100%}
+    #hourglassImg{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:contain;
+      object-position:center top;
+      z-index:1;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+    #sand{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      z-index:2;
+      pointer-events:none;
+    }
+
+    .card{
+      width:min(500px,92vw);
+      margin-top:-64px;
+      color:#fff;
+      padding:30px 30px 26px;
+      border-radius:18px;
+      /* subtle gradient + highlight (premium feel) */
+      background: linear-gradient(180deg, rgba(41,75,82,1) 0%, rgba(30,56,61,1) 100%);
+      box-shadow:
+        0 28px 60px rgba(0,0,0,0.34),
+        0 10px 22px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+
+      /* Center content */
+      text-align:center;
+    }
+
+    .card h1{font-size:34px;margin-bottom:10px}
+    .card h1{
+      font-size:34px;
+      line-height:1.05;
+      margin-bottom:12px;
+      letter-spacing:0.2px;
+    }
+
+    .subhead{
+      font-size:15px;
+      opacity:0.92;
+      margin-bottom:14px;
+    }
+
+    .features{
+      list-style:none;
+      padding:0;
+      margin:0 0 18px;
+      display:grid;
+      gap:10px;
+      text-align:left;
+    }
+
+    .features li{
+      padding-left:14px;
+      position:relative;
+      opacity:0.95;
+      font-size:14px;
+    }
+
+    .features li::before{
+      content:"•";
+      position:absolute;
+      left:0;
+      opacity:0.8;
+    }
+    .card p{font-size:14px;opacity:.9;margin-bottom:14px}
+
+    .card p.trust{
+      margin-top:8px;
+      font-size:10px !important;
+      opacity:0.7;
+      letter-spacing:0.2px;
+    }
+
+    .card p.mic{
+      margin-top:19px;
+      font-size:9px !important;
+      text-transform: uppercase;
+      opacity:0.55;
+      letter-spacing:0.35px;
+    }
+    .card ul{padding-left:18px;opacity:.9;font-size:14px;margin-bottom:18px}
+
+    .card input{
+      width:100%;
+      margin-top: 4px;
+      padding:16px;
+      border-radius:14px;
+
+      background:#163A36;
+      border:2px solid rgba(43, 91, 85, 0.4);
+
+      color:#fff;
+      text-align:center;
+      outline:none;
+
+      box-shadow:
+        0 10px 22px rgba(0,0,0,0.26),
+        0 3px 6px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+
+      transition: border 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .card input::placeholder{
+      color:rgba(255,255,255,0.62);
+    }
+
+    .card input:focus{
+      border:2px solid rgba(43, 91, 85, 0.75);
+      box-shadow:
+        0 0 0 4px rgba(43, 91, 85, 0.22),
+        0 12px 26px rgba(0,0,0,0.30),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .card{
+      width:min(560px,92vw);
+      padding:30px 34px 26px;
+      border-radius:22px;
+      text-align:center;
+
+      /* keep your gradient but soften it */
+      background: linear-gradient(180deg, rgba(28,58,57,0.96) 0%, rgba(18,44,43,0.96) 100%);
+      box-shadow:
+        0 40px 90px rgba(0,0,0,0.32),
+        0 16px 30px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .brand{
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:0.2px;
+      margin:0 0 10px;
+      opacity:0.95;
+    }
+
+    .headline{
+      font-size:34px;
+      line-height:1.1;
+      margin:0 0 12px;
+      font-weight:900;
+    }
+
+    .headline span{
+      opacity:0.9;
+    }
+
+    .subhead{
+      font-size:15px;
+      line-height:1.35;
+      opacity:0.9;
+      margin:0 0 18px;
+    }
+
+    .features{
+      list-style:none;
+      padding:0;
+      margin:0 auto 18px;
+      max-width: 360px;
+      display:grid;
+      gap:10px;
+      text-align:left;
+    }
+
+    .features li{
+      position:relative;
+      padding-left:26px;
+      font-size:14px;
+      opacity:0.85;
+    }
+
+    .features li::before{
+      content:"✓";
+      position:absolute;
+      left:0;
+      top:0;
+      font-weight:900;
+      opacity:0.85;
+    }
+
+    /* Hover effect */
+    .features li:hover::before {
+      color: #38C172;   /* complementary green */
+      transform: scale(1.15);
+      text-shadow: 0 0 6px rgba(56,193,114,0.4);
+    }     
+
+    .card button{
+      width:100%;
+      padding:16px 18px;
+      border-radius:999px;
+      border:none;
+
+      background:#FFB34F;
+      color:#fff;
+      font-weight:800;
+      font-size:16px;
+
+      cursor:pointer;
+      display:block;
+      margin:14px auto 0;
+      margin-top: 18px;
+
+      box-shadow:
+        0 14px 30px rgba(0,0,0,0.35),
+        0 4px 10px rgba(0,0,0,0.18);
+
+      transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+    }
+
+    .card button:hover{
+      background:#F4A63E;
+      transform: translateY(-2px);
+      box-shadow:
+        0 18px 34px rgba(0,0,0,0.38),
+        0 6px 12px rgba(0,0,0,0.22);
+    }
+
+    .card button:active{
+      background:#E8962F;
+      transform: translateY(1px);
+      box-shadow:
+        0 8px 16px rgba(0,0,0,0.28),
+        0 3px 6px rgba(0,0,0,0.18);
+    }
+
+    .card button:disabled{
+      opacity:0.75;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    body{ padding-bottom: clamp(48px, 6vh, 96px); }
+
+    /* Hover */
+    .card button:hover {
+      background: #F4A63E;
+      transform: translateY(-3px);
+      box-shadow:
+        0 16px 30px rgba(0, 0, 0, 0.32),
+        0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Clicked */
+    .card button:active {
+      background: #E8962F;
+      transform: translateY(1px);
+      box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.25),
+        0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .centered-input {
+      text-align: center;
+        }
+
+    /* Modal overlay */
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      background:rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index:9999;
+    }
+
+    .modal-overlay.show{ display:flex; }
+
+    /* Modal card */
+    .modal{
+      width:min(620px, 92vw);
+      border-radius:28px;
+      padding:26px 26px 22px;
+      color:#fff;
+      text-align:center;
+
+      background: rgba(22, 58, 54, 0.55); /* glass over your teal */
+      border: 1.5px solid rgba(255,255,255,0.25);
+
+      box-shadow:
+        0 30px 70px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+
+      transform: translateY(14px) scale(0.98);
+      opacity: 0;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .modal-overlay.show .modal{
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .modal h2{
+      font-size: 30px;
+      margin: 2px 0 10px;
+      letter-spacing: 0.2px;
+    }
+
+    .modal p{
+      font-size: 16px;
+      opacity: 0.9;
+      margin: 0 0 18px;
+    }
+
+    /* Close button */
+    .modal-close{
+      position:absolute;
+      right:18px;
+      top:14px;
+      width:40px;
+      height:40px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.25);
+      background: rgba(0,0,0,0.12);
+      color:#fff;
+      font-size:24px;
+      cursor:pointer;
+    }
+
+    /* Modal CTA matches your gold button */
+    .modal-cta{
+      width:min(420px, 100%);
+      padding: 16px 20px;
+      border-radius: 999px;
+      border:none;
+      background:#FFB34F;
+      color:#fff;
+      font-weight:800;
+      font-size:18px;
+      cursor:pointer;
+
+      box-shadow:
+        0 14px 30px rgba(0,0,0,0.35),
+        0 4px 10px rgba(0,0,0,0.18);
+
+      transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+    }
+
+    .modal-cta:hover{
+      background:#F4A63E;
+      transform: translateY(-2px);
+    }
+
+    .modal-cta:active{
+      background:#E8962F;
+      transform: translateY(1px);
+    }
+
+    .hp{
+      position:absolute;
+      left:-9999px;
+      top:auto;
+      width:1px;
+      height:1px;
+      overflow:hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="hero" id="hero">
+    <div id="heroFrame">
+      <img id="hourglassImg" src="hourglass1.png" alt="Hourglass"/>
+      <canvas id="sand"></canvas>
+    </div>
+  </section>
+
+  <div class="card">
+    <h2>Stop wasting food. Stop wasting money.</h2>
+    <p class="subhead">Expiry reminders and personalized recipes from what's in your kitchen.</p>
+    <ul class="features">
+      <li>Smart expiry alerts</li>
+      <li>Personalized recipes</li>
+      <li>Shelf Dashboard</li>
+    </ul>
+    <input id="emailInput" type="email" placeholder="youremail@here.com" class="centered-input"/>
+    <input type="text" id="website" name="website" autocomplete="off" tabindex="-1" class="hp" aria-hidden="true">
+    <button id="joinBtn" type="button"> Save Your Spot </button>
+    <p class="trust">No spam. Unsubscribe anytime.</p>
+    <p class="mic">Made in 🍁 </p>
+  </div>
+
+</body>
+
+<!-- Modal -->
+<div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+
+    <h2 id="modalTitle">Congratulations</h2>
+    <p>You're on the waitlist. We'll email you when early access opens.</p>
+
+    <button class="modal-cta" id="modalCta" type="button"> Wahoo! </button>
+  </div>
+</div>
+
+<script>
+  // Elements
+  const input = document.getElementById("emailInput");
+  const button = document.getElementById("joinBtn");
+  const hp = document.getElementById("website");
+
+  const overlay = document.getElementById("modalOverlay");
+  const closeBtn = document.getElementById("modalClose");
+  const modalCta = document.getElementById("modalCta");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalMsg = overlay.querySelector("p");
+
+  // IMPORTANT: keep your real /exec URL here
+  const endpoint = "https://script.google.com/macros/s/AKfycbx1ONyCARMLS57yONNipIIimtlM4A7Tj1mvN1KD6S_FaIj9yquBZSTqfDphbRRtcndO/exec";
+
+  function isValidEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function openModal(){
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  // Modal close handlers (attach ONCE)
+  closeBtn?.addEventListener("click", closeModal);
+  modalCta?.addEventListener("click", closeModal);
+
+  overlay?.addEventListener("click", (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay?.classList.contains("show")) closeModal();
+  });
+
+  // JSONP subscribe (GET) — works on GitHub Pages
+  function subscribe(email) {
+    return new Promise((resolve, reject) => {
+      const cbName = "cb_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+
+      const t = setTimeout(() => {
+        cleanup();
+        reject(new Error("Timeout"));
+      }, 8000);
+
+      function cleanup(){
+        clearTimeout(t);
+        if (window[cbName]) delete window[cbName];
+        script.remove();
+      }
+
+      window[cbName] = (data) => {
+        cleanup();
+        resolve(data);
+      };
+
+      const url =
+        endpoint +
+        `?email=${encodeURIComponent(email)}` +
+        `&website=${encodeURIComponent(hp?.value || "")}` +
+        `&callback=${cbName}`;
+
+      script.src = url;
+      document.body.appendChild(script);
+    });
+  }
+
+  // Submit handler
+  button?.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const email = input.value.trim();
+    if (!email) return alert("Enter an email.");
+    if (!isValidEmail(email)) return alert("Invalid email.");
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+      const res = await subscribe(email);
+
+      if (res.result === "success") {
+        input.value = "";
+        openModal(); // show modal on success
+      } else if (res.result === "exists") {
+        // Optional: change modal copy if you want
+        openModal();
+      } else if (res.result === "rate_limited") {
+        alert("Slow down 🙂 Please try again in a moment.");
+      } else {
+        alert("Try again.");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Error — try again");
+    } finally {
+      button.textContent = originalText;
+      button.disabled = false;
+    }
+  });
+</script>
+
+
+<script>
+  const card = document.querySelector(".card");
+
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+  function updateProximity(e){
+    const r = card.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+
+    // 0 = far, 1 = close
+    const maxDist = 420;               // feel free to tweak
+    const t = 1 - clamp(dist / maxDist, 0, 1);
+
+    // Blur ramps up as you get closer
+    const blurPx = (t * 8).toFixed(2); // up to 8px blur
+    document.documentElement.style.setProperty("--blur", `${blurPx}px`);
+
+    // Card shadow ramps up + slight lift
+    document.documentElement.style.setProperty("--cardLift", `${(t*6).toFixed(2)}px`);
+    document.documentElement.style.setProperty("--cardShadowA", (0.22 + t*0.20).toFixed(3));
+    document.documentElement.style.setProperty("--cardShadowB", (0.14 + t*0.10).toFixed(3));
+  }
+
+  function resetProximity(){
+    document.documentElement.style.setProperty("--blur", `0px`);
+    document.documentElement.style.setProperty("--cardLift", `0px`);
+    document.documentElement.style.setProperty("--cardShadowA", `0.22`);
+    document.documentElement.style.setProperty("--cardShadowB", `0.14`);
+  }
+
+  // Only run on pointer devices that support hover
+  const canHover = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
+  if (canHover) {
+    window.addEventListener("mousemove", updateProximity, { passive: true });
+    window.addEventListener("mouseleave", resetProximity);
+  }
+</script>
+
+</html>
